@@ -20,3 +20,6 @@ sshBruteForcer.py -I targets.txt -p 22 -U usernames.txt -P passwords.txt -t 15 -
 Example of targets.txt:
 127.0.0.1:22
 127.0.0.2:23
+
+
+For educational use only.
