@@ -21,11 +21,11 @@ class Connection (Thread):
     Username and password combination was successful.
     '''
 
-    def __init__(self,userName, password, targetIp, portNumber, timeoutTime):
+    def __init__(self,username, password, targetIp, portNumber, timeoutTime):
         
         super(Connection, self).__init__()
         
-        self.userName    = userName
+        self.username    = username
         self.password    = password
         self.targetIp    = targetIp
         self.portNumber  = portNumber
@@ -38,7 +38,7 @@ class Connection (Thread):
         sshConnection.set_missing_host_key_policy(AutoAddPolicy())
         
         try:
-            sshConnection.connect(self.targetIp, port = self.portNumber, username = self.userName,
+            sshConnection.connect(self.targetIp, port = self.portNumber, username = self.username,
                                   password = self.password, timeout = self.timeoutTime, allow_agent = False,
                                   look_for_keys = False)
             

