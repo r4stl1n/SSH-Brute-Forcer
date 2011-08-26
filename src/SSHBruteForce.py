@@ -20,9 +20,9 @@ class SSHBruteForce():
         self.userNames = []
         self.passwords = []
         self.connections  = []
-        self.amountOfThreads = 10
+        self.amountOfThreads = 0
         self.currentThreadCount = 0
-        self.timeoutTime = 15
+        self.timeoutTime = 0
         self.verbose = False
         
     def startUp(self):
@@ -30,12 +30,12 @@ class SSHBruteForce():
         
         optionParser = OptionParser(version = self.info, usage = usage)
 
-        optionParser.add_option('-h', dest = 'targetIp',        help = 'Host To Attack')
-        optionParser.add_option('-U', dest = 'userList',        help = 'Username List file')
-        optionParser.add_option('-P', dest = 'passwordList',    help = 'Password List file')
-        optionParser.add_option('-t', type = 'int', dest = 'threads',      help = 'Amount of Threads')
-        optionParser.add_option('-T', type = 'int', dest = 'timeout',      help = 'Timeout Time')
-        optionParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='verbose')
+        optionParser.add_option('-i',  dest = 'targetIp',        help = 'Host To Attack')
+        optionParser.add_option('-U',  dest = 'userList',        help = 'Username List file')
+        optionParser.add_option('-P',  dest = 'passwordList',    help = 'Password List file')
+        optionParser.add_option('-t',  type = 'int', dest = 'threads', default = 10,  help = 'Amount of Threads')
+        optionParser.add_option('-T',  type = 'int', dest = 'timeout', default = 15,  help = 'Timeout Time')
+        optionParser.add_option('-v',  '--verbose', action='store_true', dest='verbose', help='verbose')
 
         (options, args) = optionParser.parse_args()
 
@@ -92,3 +92,7 @@ class SSHBruteForce():
     def completed(self):
         print "[*] Completed Brute Force."
         sys.exit(0)
+        
+if __name__ == '__main__':
+    sshBruteForce = SSHBruteForce()
+    sshBruteForce.startUp()
