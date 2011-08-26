@@ -17,10 +17,11 @@ class SSHBruteForce():
 
     def __init__(self):
         
-        self.info = "SSH Brute Forcer: By Wildicv"
+        self.info = "Simple SSH Brute Forcer: By Wildicv"
         self.targetIp = ""
         self.userNameList = []
         self.passwordList = []
+        self.verbose = False
         
     def startUp(self):
         
@@ -28,9 +29,9 @@ class SSHBruteForce():
         
         optionParser = OptionParser(version = self.info, usage = usage)
 
-        optionParser.add_option('-h', dest = 'targetIp',   help = 'Host To Attack')
-        optionParser.add_option('-U', dest = 'userList',   help='Username List file')
-        optionParser.add_option('-P', dest = 'passwordList',   help='Password List file')
+        optionParser.add_option('-h', dest = 'targetIp',     help = 'Host To Attack')
+        optionParser.add_option('-U', dest = 'userList',     help = 'Username List file')
+        optionParser.add_option('-P', dest = 'passwordList', help = 'Password List file')
         optionParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='verbose')
 
         (options, args) = optionParser.parse_args()
@@ -42,3 +43,14 @@ class SSHBruteForce():
         self.targetIp = options.targetIp
         self.userNameList = fileContentsToList(options.userList)
         self.passwordList = fileContentsToList(options.passwordlist)
+        self.verbose = options.verbose
+        
+    def showStartInfo(self):
+        print "[*] %s " % self.info
+        print "[*] Brute Forcing %s"     % self.targetIp
+        print "[*] Loaded %s Usernames"  % str(len(self.userNameList))
+        print "[*] Loaded %s Passwords"  % str(len(self.passwordList))
+        print "[*] Brute Force Starting"
+
+    
+        
