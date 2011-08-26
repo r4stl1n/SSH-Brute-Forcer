@@ -30,7 +30,7 @@ class SSHBruteForce():
         self.verbose = False
         
     def startUp(self):
-        usage = '%s [-h targetIp] [-U UserNameList] [-P PasswordList] [-v]' % sys.argv[0]
+        usage = '%s [-i targetIp] [-U usernamesFile] [-P passwordsFile]' % sys.argv[0]
         
         optionParser = OptionParser(version = self.info, usage = usage)
 
