@@ -25,6 +25,8 @@ class SSHBruteForce():
         self.amountOfThreads = 0
         self.currentThreadCount = 0
         self.timeoutTime = 0
+        self.outputFileName = ""
+        self.singleMode = False
         self.verbose = False
         
     def startUp(self):
@@ -46,6 +48,8 @@ class SSHBruteForce():
                                 help = 'Amount of Threads', default = 10)
         optionParser.add_option('-T',  type = 'int', dest = 'timeout', 
                                 help = 'Timeout Time', default = 15)
+        optionParser.add_option('-O', dest = "outputFile",
+                                help = 'Output File Name')
         optionParser.add_option('-v',  '--verbose', action='store_true', 
                                 dest='verbose', help='verbose')
 
@@ -62,7 +66,7 @@ class SSHBruteForce():
                 #Then we check if it is a single ip only
                 if options.targetIp and not options.targetsFile:
                     self.singleTarget(options)
-        
+                    self.singleMode = True
                 elif not options.targetIp and options.targetsFilet:
                     self.multipleTargets(options)
                 else:
@@ -79,6 +83,7 @@ class SSHBruteForce():
             self.passwords = Util.fileContentsToList(options.passwordsFile)
             self.amountOfThreads = options.threads
             self.timeoutTime = options.timeout
+            self.outputFileName = options.ouputFile
             self.verbose = options.verbose
             self.showStartInfo()
             self.bruteForceSingle()
@@ -89,16 +94,30 @@ class SSHBruteForce():
             self.passwords = Util.fileContentsToList(options.passwordsFile)
             self.amountOfThreads = options.threads
             self.timeoutTime = options.timeout
+            self.outputFileName = options.ouputFile
             self.verbose = options.verbose
             self.showStartInfo()
             self.bruteForceMultiple()
         
     def showStartInfo(self):
         print "[*] %s " % self.info
-        print "[*] Brute Forcing %s"     % self.targetIp
-        print "[*] Loaded %s Usernames"  % str(len(self.usernames))
-        print "[*] Loaded %s Passwords"  % str(len(self.passwords))
-        print "[*] Brute Force Starting"
+        if self.singleMode:
+            print "[*] Brute Forcing %s "  % self.targetIp
+        else:
+            print "[*] Loaded %s Targets " % str(len(self.targets))
+        print "[*] Loaded %s Usernames "   % str(len(self.usernames))
+        print "[*] Loaded %s Passwords "   % str(len(self.passwords))
+        print "[*] Brute Force Starting "
+        
+        if self.outputFileName != "":
+            Util.appendLineToFile("%s " % self.info, self.outputFileName)
+            if self.singleMode:
+                Util.appendLineToFile("Brute Forcing %s "  % self.targetIp, self.outputFileName)
+            else:
+                Util.appendLineToFile("Loaded %s Targets " % str(len(self.targets)),  self.outputFileName)
+            Util.appendLineToFile("Loaded %s Usernames "   % str(len(self.usernames)), self.outputFileName)
+            Util.appendLineToFile("Loaded %s Passwords "   % str(len(self.passwords)), self.outputFileName)
+            Util.appendLineToFile("Brute Force Starting ", self.outputFileName)
 
     def bruteForceSingle(self):
         for username in self.usernames:
@@ -122,6 +141,8 @@ class SSHBruteForce():
         connection.start()
         self.connections.append(connection)
         self.currentThreadCount += 1
+        if self.verbose:
+            print "[*] Adding Target: %s, Testing with username: %s, testing with password: %s" % targetIp, username, password
         
     def currentThreadResults(self):
         for connection in self.connections:
@@ -130,11 +151,19 @@ class SSHBruteForce():
                 print "[#] TargetIp: %s " % connection.targetIp
                 print "[#] Username: %s " % connection.username
                 print "[#] Password: %s " % connection.password
+                
+                if self.outputFileName != "":
+                    Util.appendLineToFile("TargetIp: %s " % connection.targetIp, self.outputFileName)
+                    Util.appendLineToFile("Username: %s " % connection.username, self.outputFileName)
+                    Util.appendLineToFile("Password: %s " % connection.password, self.outputFileName)
+                    
+                if self.singleMode:
+                    self.completed()
             else:
                 pass
     
         self.clearOldThreads()
-        
+
     def clearOldThreads(self):
         self.connections = []
         self.threadCount = 0

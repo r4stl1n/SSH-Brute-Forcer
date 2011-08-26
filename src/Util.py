@@ -42,3 +42,9 @@ def fileContentsToTuple(fileName):
         tupleList.append(newTuple)
         
     return tupleList
+
+def appendLineToFile(line,filename):
+    fileHandler = open(filename,"a")
+    fileHandler.write(line + "\n")
+    fileHandler.close()
+    
