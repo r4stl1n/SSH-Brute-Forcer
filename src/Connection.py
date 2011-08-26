@@ -3,9 +3,17 @@ Created on Aug 25, 2011
 
 @author: wildicv
 '''
+import sys
+
 from threading import Thread
-from paramiko import SSHClient
-from paramiko import AutoAddPolicy
+#Check For Paramiko Dependency
+try:
+    from paramiko import SSHClient
+    from paramiko import AutoAddPolicy
+except ImportError:
+    print 'Missing Paramiko Dependency.'
+    sys.exit(0)
+
 
 class Connection (Thread):
     '''
@@ -13,13 +21,13 @@ class Connection (Thread):
     Username and password combination was succesful.
     '''
 
-    def __init__(self,userName, passWord, targetIP, portNumber, timeoutTime):
+    def __init__(self,userName, password, targetIp, portNumber, timeoutTime):
         
         super(Connection, self).__init__()
         
         self.userName    = userName
-        self.passWord    = passWord
-        self.targetIP    = targetIP
+        self.password    = password
+        self.targetIp    = targetIp
         self.portNumber  = portNumber
         self.timeoutTime = timeoutTime
         self.status = ""
@@ -30,9 +38,9 @@ class Connection (Thread):
         sshConnection.set_missing_host_key_policy(AutoAddPolicy())
         
         try:
-            sshConnection.connect(self.targetIP, port = self.portNumber, username = self.userName,
-                                  password = self.password, pkey = None, timeout = self.timeoutTime,
-                                  allow_agent = False, look_for_keys = False)
+            sshConnection.connect(self.targetIp, port = self.portNumber, username = self.userName,
+                                  password = self.password, timeout = self.timeoutTime, allow_agent = False,
+                                  look_for_keys = False)
             
             self.status = 'ok'
             sshConnection.close()
