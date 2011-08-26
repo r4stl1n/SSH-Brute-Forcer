@@ -8,7 +8,7 @@ import sys
 from optparse import OptionParser
 
 #Import the Util Class
-from Util import *
+import Util
 #Import the connection class
 from Connection import Connection
 
@@ -41,9 +41,12 @@ class SSHBruteForce():
             sys.exit(1)
             
         self.targetIp = options.targetIp
-        self.userNames = fileContentsToList(options.userList)
-        self.passwords = fileContentsToList(options.passwordlist)
+        self.userNames = Util.fileContentsToList(options.userList)
+        self.passwords = Util.fileContentsToList(options.passwordlist)
         self.verbose = options.verbose
+        
+        self.showStartInfo()
+        self.bruteForceSingle()
         
     def showStartInfo(self):
         print "[*] %s " % self.info
@@ -81,5 +84,6 @@ class SSHBruteForce():
         self.connections = []
         self.threadCount = 0
                 
-    
-    
+    def completed(self):
+        print "[*] Completed Brute Force."
+        sys.exit(0)

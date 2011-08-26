@@ -11,8 +11,11 @@ def fileContentsToList(file):
     try:
         fileParser = open(file, 'r')
         
+    except IOError:
+        print "[!] Could not open file %s " % file
+        
     except:
-        print "[!] Unable to read file"
+        print "[!] Could not access file %s" % file
         
     for line in fileParser.readlines():
         newLine = line.replace('\n', '')
