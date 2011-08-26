@@ -5,7 +5,6 @@ Created on Aug 25, 2011
 '''
 
 import sys
-from optparse import OptionError
 from optparse import OptionParser
 
 #Import the Util Class
