@@ -18,7 +18,7 @@ except ImportError:
 class Connection (Thread):
     '''
     This is the class that checks if a specific
-    Username and password combination was succesful.
+    Username and password combination was successful.
     '''
 
     def __init__(self,userName, password, targetIp, portNumber, timeoutTime):
@@ -42,7 +42,7 @@ class Connection (Thread):
                                   password = self.password, timeout = self.timeoutTime, allow_agent = False,
                                   look_for_keys = False)
             
-            self.status = 'ok'
+            self.status = 'Succeeded'
             sshConnection.close()
         except:      
-            self.status = 'error'
+            self.status = 'Failed'

