@@ -83,18 +83,18 @@ class SSHBruteForce():
             self.passwords = Util.fileContentsToList(options.passwordsFile)
             self.amountOfThreads = options.threads
             self.timeoutTime = options.timeout
-            self.outputFileName = options.ouputFile
+            self.outputFileName = options.outputFile
             self.verbose = options.verbose
             self.showStartInfo()
             self.bruteForceSingle()
-            
+			
     def multipleTargets(self,options):    
             self.targets = Util.fileContentsToTuple(options.targetsFile)
             self.usernames = Util.fileContentsToList(options.usernamesFile)
             self.passwords = Util.fileContentsToList(options.passwordsFile)
             self.amountOfThreads = options.threads
             self.timeoutTime = options.timeout
-            self.outputFileName = options.ouputFile
+            self.outputFileName = options.outputFile
             self.verbose = options.verbose
             self.showStartInfo()
             self.bruteForceMultiple()
@@ -126,6 +126,8 @@ class SSHBruteForce():
                                       self.targetPort, self.timeoutTime)
                 if self.currentThreadCount == self.amountOfThreads:
                     self.currentThreadResults()
+		self.currentThreadResults()
+		self.completed()
                     
     def bruteForceMultiple(self):
         for target in self.targets:
@@ -135,9 +137,11 @@ class SSHBruteForce():
                                           int(target[1]), self.timeoutTime)
                     if self.currentThreadCount == self.amountOfThreads:
                         self.currentThreadResults()
+		self.currentThreadResults()
+		self.completed()
         
-    def createConnection(self, username, password, targetIp):
-        connection = Connection(username, password, targetIp, 22, self.timeoutTime)
+    def createConnection(self, username, password, targetIp, targetPort, timeoutTime):
+        connection = Connection(username, password, targetIp, targetPort, timeoutTime)
         connection.start()
         self.connections.append(connection)
         self.currentThreadCount += 1
