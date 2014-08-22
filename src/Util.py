@@ -1,7 +1,7 @@
 '''
 Created on Aug 25, 2011
 
-@author: wildicv
+@author: r4stl1n
 '''
 
 def fileContentsToList(fileName):
@@ -44,7 +44,7 @@ def fileContentsToTuple(fileName):
     return tupleList
 
 def appendLineToFile(line,filename):
-    fileHandler = open(filename,"a")
+    fileHandler = open(filename,"a+")
     fileHandler.write(line + "\n")
     fileHandler.close()
     

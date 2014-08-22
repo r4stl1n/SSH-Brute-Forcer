@@ -1,7 +1,7 @@
 '''
 Created on Aug 25, 2011
 
-@author: wildicv
+@author: r4stl1n
 '''
 import sys
 
