@@ -18,6 +18,12 @@ python SSHBruteForce.py -I targets.txt -p 22 -U usernames.txt -P passwords.txt -
 Use the -O flag to specify an output file:
 python SSHBruteForce.py.py -I targets.txt -p 22 -U usernames.txt -P passwords.txt -t 15 -T 30 -O output.txt
 
+Single Ip BruteForce Attack:
+python SSHBruteForce.py -i 127.0.0.1 -p 22 -a 100 -l 8
+
+Multiple Ip BruteForce Attack:
+python SSHBruteForce.py -I targets.txt -p 22 -a 100 -l 8
+
 Example of targets.txt:
 127.0.0.1:22
 127.0.0.2:23
