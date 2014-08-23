@@ -38,11 +38,11 @@ class Connection (Thread):
         sshConnection.set_missing_host_key_policy(AutoAddPolicy())
         
         try:
-            sshConnection.connect(self.targetIp, port = self.portNumber, username = self.username,
-                                  password = self.password, timeout = self.timeoutTime, allow_agent = False,
-                                  look_for_keys = False)
+            sshConnection.connect(self.targetIp, port = int(self.portNumber), 
+                username = self.username,password = self.password, 
+                timeout = int(self.timeoutTime), allow_agent = False,look_for_keys = False)
             
             self.status = 'Succeeded'
             sshConnection.close()
-        except:      
+        except:
             self.status = 'Failed'

