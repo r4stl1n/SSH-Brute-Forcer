@@ -80,7 +80,7 @@ class SSHBruteForce():
                     if options.targetIp and not options.targetsFile:
                         self.singleMode = True
                         self.singleTarget(options)
-                    elif not options.targetIp and options.targetsFilet:
+                    elif not options.targetIp and options.targetsFile:
                         self.multipleTargets(options)
                     else:
                         optionParser.print_help()
@@ -120,7 +120,7 @@ class SSHBruteForce():
             self.bruteForceSingle();
             self.showStartInfo()
 
-    def multipleTarget(self,options):
+    def multipleTargets(self,options):
         self.targets = Util.fileContentsToTuple(options.targetsFile)
         self.amountOfThreads = options.threads
         self.timeoutTime = options.timeout
