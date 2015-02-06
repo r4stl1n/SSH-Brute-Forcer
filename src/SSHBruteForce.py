@@ -8,9 +8,7 @@ import sys
 import random
 from optparse import OptionParser
 
-#Import the Util Class
 import Util
-#Import the connection class
 from Connection import Connection
 
 class SSHBruteForce():
@@ -182,14 +180,14 @@ class SSHBruteForce():
 		self.currentThreadResults()
         
     def bruteForceSingle(self):
-        for x in range(self.bruteForceAttempts):
+        for x in range(int(self.bruteForceAttempts)):
             randomUserString = ""
             randomPasswordString = ""
-            randomStringLength = random.randint(4,self.bruteForceLength)
+            randomStringLength = random.randint(4,int(self.bruteForceLength))
             for y in range(randomStringLength):
                 randomUserString = randomUserString+random.choice(self.characters)
             
-            randomStringLength = random.randint(4,self.bruteForceLength)
+            randomStringLength = random.randint(4,int(self.bruteForceLength))
             
             for z in range(randomStringLength):
                 randomPasswordString = randomPasswordString + random.choice(self.characters)
