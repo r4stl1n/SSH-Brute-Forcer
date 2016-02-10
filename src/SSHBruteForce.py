@@ -48,7 +48,9 @@ class SSHBruteForce():
         optionParser.add_option('-l', dest='lengthLimit',
                                 help = 'Length of bruteforce strings', default = 8)
         optionParser.add_option('-I',  dest = 'targetsFile',
-                                help = 'List of IP\'s and ports')       
+                                help = 'List of IP\'s and ports')
+        optionParser.add_option('-C',  dest = 'combolistFile',              
+                                help = 'Combo List file')
         optionParser.add_option('-U',  dest = 'usernamesFile',              
                                 help = 'Username List file')  
         optionParser.add_option('-P',  dest = 'passwordsFile',          
@@ -73,7 +75,7 @@ class SSHBruteForce():
             #Check to see if we are running a dictionary attack or a bruteforce
             if bool(options.typeOfAttack) == True:
                 #Then another check to make sure the Username list and passwordlist are filled
-                if options.usernamesFile and options.passwordsFile:
+                if (options.usernamesFile and options.passwordsFile) or options.combolistFile:
                     #Then we check if it is a single ip only
                     if options.targetIp and not options.targetsFile:
                         self.singleMode = True
@@ -108,10 +110,13 @@ class SSHBruteForce():
         self.verbose = options.verbose
         self.bruteForceLength = options.lengthLimit
         self.bruteForceAttempts = options.attemptAmount
-
-        if bool(options.typeOfAttack):
-            self.usernames = Util.fileContentsToList(options.usernamesFile)
-            self.passwords = Util.fileContentsToList(options.passwordsFile)
+        
+        if bool(options.typeOfAttack):           
+            if options.combolistFile:
+                self.usernames, self.passwords = self.__seperateDataFromComboList(options.combolistFile)
+            else:
+                self.usernames = Util.fileContentsToList(options.usernamesFile)
+                self.passwords = Util.fileContentsToList(options.passwordsFile)
             self.showStartInfo()
             self.dictionaryAttackSingle()
         else:
@@ -128,13 +133,25 @@ class SSHBruteForce():
         self.bruteForceAttempts = options.attemptAmount
 
         if bool(options.typeOfAttack):
-            self.usernames = Util.fileContentsToList(options.usernamesFile)
-            self.passwords = Util.fileContentsToList(options.passwordsFile)
+            if options.combolistFile:
+                self.usernames, self.passwords = self.__seperateDataFromComboList(options.combolistFile)
+            else:
+                self.usernames = Util.fileContentsToList(options.usernamesFile)
+                self.passwords = Util.fileContentsToList(options.passwordsFile)
             self.showStartInfo()
             self.dictionaryAttackMultiple()
         else:
             self.bruteForceMultiple()
             self.showStartInfo()
+    
+    @staticmethod
+    def __seperateDataFromComboList(comboListFile):
+        usernames = []
+        passwords = []
+        for t in Util.fileContentsToTuple(comboListFile):
+            usernames.append(t[0])
+            passwords.append(t[1])
+        return usernames, passwords
 
 
     def showStartInfo(self):
