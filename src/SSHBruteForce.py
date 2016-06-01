@@ -120,8 +120,8 @@ class SSHBruteForce():
             self.showStartInfo()
             self.dictionaryAttackSingle()
         else:
-            self.bruteForceSingle();
             self.showStartInfo()
+            self.bruteForceSingle()
 
     def multipleTargets(self,options):
         self.targets = Util.fileContentsToTuple(options.targetsFile)
@@ -141,8 +141,8 @@ class SSHBruteForce():
             self.showStartInfo()
             self.dictionaryAttackMultiple()
         else:
-            self.bruteForceMultiple()
             self.showStartInfo()
+            self.bruteForceMultiple()
     
     @staticmethod
     def __seperateDataFromComboList(comboListFile):
