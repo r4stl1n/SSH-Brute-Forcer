@@ -95,7 +95,7 @@ class SSHBruteForce():
                 if options.targetIp and not options.targetsFile:
                     self.singleMode = True
                     self.singleTarget(options)
-                elif not options.targetIp and options.targetsFilet:
+                elif not options.targetIp and options.targetsFile:
                     self.multipleTargets(options)
                 else:
                     optionParser.print_help()
