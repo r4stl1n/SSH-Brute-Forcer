@@ -9,7 +9,7 @@ def fileContentsToList(fileName):
     lineList = []
 
     try:
-        fileParser = open(fileName, 'r')
+        fileParser = open(fileName, 'r', encoding='latin-1')
 
     except IOError:
         print("[!] Could not open file " + fileName)
