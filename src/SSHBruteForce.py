@@ -166,14 +166,14 @@ class SSHBruteForce():
         print("[*] Brute Force Starting ")
 
         if self.outputFileName is not None:
-            Util.appendLineToFile("{} ".format(self.info, self.outputFileName))
-            if self.singleMode:
+            Util.appendLineToFile("{}".format(self.info), self.outputFileName)
+	    if self.singleMode:
                 Util.appendLineToFile("Brute Forcing {} ".format(self.targetIp, self.outputFileName))
             else:
-                Util.appendLineToFile("Loaded {} Targets ".format(str(len(self.targets)), self.outputFileName))
-            Util.appendLineToFile("Loaded {} Usernames ".format(str(len(self.usernames)), self.outputFileName))
-            Util.appendLineToFile("Loaded {} Passwords ".format(str(len(self.passwords)), self.outputFileName))
-            Util.appendLineToFile("Brute Force Starting ", self.outputFileName)
+                Util.appendLineToFile("Loaded {} Targets ".format(len(self.targets)), self.outputFileName)
+            	Util.appendLineToFile("Loaded {} Usernames ".format(len(self.usernames)), self.outputFileName)
+            	Util.appendLineToFile("Loaded {} Passwords ".format(len(self.passwords)), self.outputFileName)
+            	Util.appendLineToFile("Brute Force Starting ", self.outputFileName)
 
     def dictionaryAttackSingle(self):
         for username in self.usernames:
@@ -257,9 +257,12 @@ class SSHBruteForce():
                 print("[#] Password: {} ".format(connection.password))
 
                 if self.outputFileName is not None:
-                    Util.appendLineToFile("TargetIp: {} ".format(connection.targetIp, self.outputFileName))
-                    Util.appendLineToFile("Username: {} ".format(connection.username, self.outputFileName))
-                    Util.appendLineToFile("Password: {} ".format(connection.password, self.outputFileName))
+		    #Util.appendLineToFile("TargetIp: {}" .format(connection.targetIp, self.outputFileName))
+		    #Util.appendLineToFile("Username: {} ".format(connection.username, self.outputFileName))
+		    #Util.appendLineToFile("Password: {} ".format(connection.password, self.outputFileName))
+		    Util.appendLineToFile("TargetIp: {} ".format(connection.targetIp), self.outputFileName)
+		    Util.appendLineToFile("Username: {} ".format(connection.username), self.outputFileName)
+                    Util.appendLineToFile("Password: {} ".format(connection.password), self.outputFileName)
 
                 if self.singleMode:
                     self.completed()
